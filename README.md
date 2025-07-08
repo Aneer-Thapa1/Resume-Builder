@@ -44,8 +44,4 @@ npm run dev
 - Backend runs on `http://localhost:5000`
 - Frontend runs on `http://localhost:5173`
 
-## Quick Troubleshooting
-- Ensure MongoDB is running locally
-- Check console for any error messages
-- Verify all dependencies are installed correctly
-```
+
