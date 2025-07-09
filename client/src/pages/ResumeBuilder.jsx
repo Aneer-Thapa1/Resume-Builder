@@ -348,7 +348,467 @@ const ResumeBuilder = () => {
   };
 
   const exportToPDF = () => {
-    window.print();
+    // Create a new window for clean resume export
+    const printWindow = window.open("", "_blank");
+
+    // Get the selected template component
+    const SelectedTemplate =
+      selectedTemplateData?.component || ModernProfessionalTemplate;
+
+    // Create a clean HTML structure for the resume
+    const resumeHTML = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Resume - ${templateData.personalInfo.firstName} ${templateData.personalInfo.lastName}</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+          <script>
+            tailwind.config = {
+              theme: {
+                extend: {
+                  colors: {
+                    orange: {
+                      50: '#fff7ed',
+                      100: '#ffedd5',
+                      200: '#fed7aa',
+                      300: '#fdba74',
+                      400: '#fb923c',
+                      500: '#f97316',
+                      600: '#ea580c',
+                      700: '#c2410c',
+                      800: '#9a3412',
+                      900: '#7c2d12',
+                    }
+                  }
+                }
+              }
+            }
+          </script>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+            body { 
+              font-family: 'Inter', sans-serif;
+              margin: 0;
+              padding: 0;
+              background: white;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            @media print {
+              body { margin: 0; }
+              @page { 
+                margin: 0.5in; 
+                size: A4;
+              }
+              .no-print { display: none !important; }
+            }
+            .print-container {
+              width: 8.5in;
+              min-height: 11in;
+              margin: 0 auto;
+              background: white;
+              box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            @media print {
+              .print-container {
+                box-shadow: none;
+                width: 100%;
+                height: 100%;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-container">
+            <div id="resume-content"></div>
+          </div>
+          <script>
+            // Auto-print after a short delay
+            setTimeout(() => {
+              window.print();
+              setTimeout(() => {
+                window.close();
+              }, 100);
+            }, 1000);
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(resumeHTML);
+    printWindow.document.close();
+
+    // Wait for the document to load, then inject the resume content
+    printWindow.addEventListener("load", () => {
+      const resumeContainer =
+        printWindow.document.getElementById("resume-content");
+
+      // Create the resume component in the new window
+      if (selectedTemplateData?.type === "ModernProfessionalTemplate") {
+        resumeContainer.innerHTML = generateModernProfessionalHTML();
+      } else {
+        // For other templates, we'll create a basic structure
+        resumeContainer.innerHTML = generateBasicResumeHTML();
+      }
+    });
+  };
+
+  // Generate Modern Professional Template HTML
+  const generateModernProfessionalHTML = () => {
+    const data = templateData;
+
+    return `
+      <div class="bg-white min-h-full max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="bg-orange-600 text-white p-8">
+          <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold mb-2">
+              ${data.personalInfo.firstName} ${data.personalInfo.lastName}
+            </h1>
+            <p class="text-xl opacity-90 mb-4">${data.personalInfo.title}</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+                <span>${data.personalInfo.email}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                </svg>
+                <span>${data.personalInfo.phone}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                </svg>
+                <span>${data.personalInfo.location}</span>
+              </div>
+              ${
+                data.personalInfo.linkedin
+                  ? `
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.338 16.338H13.67V12.16c0-.995-.017-2.277-1.387-2.277-1.39 0-1.601 1.086-1.601 2.207v4.248H8.014v-8.59h2.559v1.174h.037c.356-.675 1.227-1.387 2.526-1.387 2.703 0 3.203 1.778 3.203 4.092v4.711zM5.005 6.575a1.548 1.548 0 11-.003-3.096 1.548 1.548 0 01.003 3.096zm-1.337 9.763H6.34v-8.59H3.667v8.59zM17.668 1H2.328C1.595 1 1 1.581 1 2.298v15.403C1 18.418 1.595 19 2.328 19h15.34c.734 0 1.332-.582 1.332-1.299V2.298C19 1.581 18.402 1 17.668 1z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>${data.personalInfo.linkedin}</span>
+                </div>
+              `
+                  : ""
+              }
+              ${
+                data.personalInfo.website
+                  ? `
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.083 9h1.946c.089-1.546.383-2.97.837-4.118A6.004 6.004 0 004.083 9zM10 2a8 8 0 100 16 8 8 0 000-16zm0 2c-.076 0-.232.032-.465.262-.238.234-.497.623-.737 1.182-.389.907-.673 2.142-.766 3.556h3.936c-.093-1.414-.377-2.649-.766-3.556-.24-.56-.5-.948-.737-1.182C10.232 4.032 10.076 4 10 4zm3.971 5c-.089-1.546-.383-2.97-.837-4.118A6.004 6.004 0 0115.917 9h-1.946zm-2.003 2H8.032c.093 1.414.377 2.649.766 3.556.24.56.5.948.737 1.182.233.23.389.262.465.262.076 0 .232-.032.465-.262.238-.234.498-.623.737-1.182.389-.907.673-2.142.766-3.556zm1.166 4.118c.454-1.147.748-2.572.837-4.118h1.946a6.004 6.004 0 01-2.783 4.118zm-6.268 0C6.412 13.97 6.118 12.546 6.03 11H4.083a6.004 6.004 0 002.783 4.118z" clip-rule="evenodd"></path>
+                  </svg>
+                  <span>${data.personalInfo.website}</span>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="p-8">
+          <!-- Professional Summary -->
+          ${
+            data.summary
+              ? `
+            <section class="mb-8">
+              <h2 class="text-xl font-bold text-orange-600 mb-3 pb-2 border-b-2 border-orange-200">
+                Professional Summary
+              </h2>
+              <p class="text-gray-700 leading-relaxed">${data.summary}</p>
+            </section>
+          `
+              : ""
+          }
+
+          <!-- Professional Experience -->
+          ${
+            data.experience && data.experience.length > 0
+              ? `
+            <section class="mb-8">
+              <h2 class="text-xl font-bold text-orange-600 mb-4 pb-2 border-b-2 border-orange-200">
+                Professional Experience
+              </h2>
+              <div class="space-y-6">
+                ${data.experience
+                  .map(
+                    (exp) => `
+                  <div>
+                    <div class="flex justify-between items-start mb-2">
+                      <div>
+                        <h3 class="text-lg font-semibold text-gray-900">
+                          ${exp.position}
+                        </h3>
+                        <p class="text-orange-600 font-medium">
+                          ${exp.company} • ${exp.location}
+                        </p>
+                      </div>
+                      <div class="text-gray-600 text-sm flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                        </svg>
+                        ${formatDateForExport(exp.startDate)} - ${
+                      exp.current ? "Present" : formatDateForExport(exp.endDate)
+                    }
+                      </div>
+                    </div>
+                    <ul class="space-y-1">
+                      ${(exp.responsibilities || [])
+                        .map(
+                          (resp) => `
+                        <li class="flex items-start gap-2 text-gray-700">
+                          <span class="text-orange-600 font-bold mt-1.5">•</span>
+                          <span>${resp}</span>
+                        </li>
+                      `
+                        )
+                        .join("")}
+                    </ul>
+                  </div>
+                `
+                  )
+                  .join("")}
+              </div>
+            </section>
+          `
+              : ""
+          }
+
+          <!-- Two Column Layout -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Education -->
+            ${
+              data.education && data.education.length > 0
+                ? `
+              <section>
+                <h2 class="text-xl font-bold text-orange-600 mb-4 pb-2 border-b-2 border-orange-200">
+                  Education
+                </h2>
+                <div class="space-y-4">
+                  ${data.education
+                    .map(
+                      (edu) => `
+                    <div>
+                      <h3 class="font-semibold text-gray-900">
+                        ${edu.degree}${edu.field ? ` in ${edu.field}` : ""}
+                      </h3>
+                      <p class="text-orange-600 font-medium">
+                        ${edu.institution}
+                      </p>
+                      <div class="flex justify-between text-sm text-gray-600">
+                        <span>
+                          ${formatDateForExport(
+                            edu.startDate
+                          )} - ${formatDateForExport(edu.endDate)}
+                        </span>
+                        ${edu.gpa ? `<span>GPA: ${edu.gpa}</span>` : ""}
+                      </div>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `
+                : ""
+            }
+
+            <!-- Certifications -->
+            ${
+              data.certifications && data.certifications.length > 0
+                ? `
+              <section>
+                <h2 class="text-xl font-bold text-orange-600 mb-4 pb-2 border-b-2 border-orange-200">
+                  Certifications
+                </h2>
+                <div class="space-y-3">
+                  ${data.certifications
+                    .map(
+                      (cert) => `
+                    <div>
+                      <h3 class="font-semibold text-gray-900">${cert.name}</h3>
+                      <p class="text-gray-600">${cert.issuer}</p>
+                      <p class="text-sm text-gray-500">
+                        ${formatDateForExport(cert.date)}
+                      </p>
+                    </div>
+                  `
+                    )
+                    .join("")}
+                </div>
+              </section>
+            `
+                : ""
+            }
+          </div>
+
+          <!-- Technical Skills -->
+          ${
+            data.skills && data.skills.length > 0
+              ? `
+            <section class="mt-8">
+              <h2 class="text-xl font-bold text-orange-600 mb-4 pb-2 border-b-2 border-orange-200">
+                Technical Skills
+              </h2>
+              <div class="flex flex-wrap gap-2">
+                ${data.skills
+                  .map(
+                    (skill) => `
+                  <span class="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                    ${skill}
+                  </span>
+                `
+                  )
+                  .join("")}
+              </div>
+            </section>
+          `
+              : ""
+          }
+        </div>
+      </div>
+    `;
+  };
+
+  // Generate basic resume HTML for other templates
+  const generateBasicResumeHTML = () => {
+    const data = templateData;
+
+    return `
+      <div class="bg-white p-8 max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">
+            ${data.personalInfo.firstName} ${data.personalInfo.lastName}
+          </h1>
+          <p class="text-xl text-gray-600 mb-4">${data.personalInfo.title}</p>
+          <div class="text-sm text-gray-600 space-y-1">
+            <p>${data.personalInfo.email} • ${data.personalInfo.phone}</p>
+            <p>${data.personalInfo.location}</p>
+          </div>
+        </div>
+
+        ${
+          data.summary
+            ? `
+          <section class="mb-6">
+            <h2 class="text-lg font-bold text-gray-800 border-b border-gray-300 pb-1 mb-3">
+              PROFESSIONAL SUMMARY
+            </h2>
+            <p class="text-gray-700">${data.summary}</p>
+          </section>
+        `
+            : ""
+        }
+
+        ${
+          data.experience && data.experience.length > 0
+            ? `
+          <section class="mb-6">
+            <h2 class="text-lg font-bold text-gray-800 border-b border-gray-300 pb-1 mb-3">
+              EXPERIENCE
+            </h2>
+            ${data.experience
+              .map(
+                (exp) => `
+              <div class="mb-4">
+                <div class="flex justify-between mb-1">
+                  <h3 class="font-semibold">${exp.position}</h3>
+                  <span class="text-sm text-gray-600">
+                    ${formatDateForExport(exp.startDate)} - ${
+                  exp.current ? "Present" : formatDateForExport(exp.endDate)
+                }
+                  </span>
+                </div>
+                <p class="font-medium text-gray-700">${exp.company}</p>
+                <ul class="text-sm text-gray-600 mt-1">
+                  ${(exp.responsibilities || [])
+                    .map((resp) => `<li>• ${resp}</li>`)
+                    .join("")}
+                </ul>
+              </div>
+            `
+              )
+              .join("")}
+          </section>
+        `
+            : ""
+        }
+
+        <div class="grid grid-cols-2 gap-8">
+          ${
+            data.education && data.education.length > 0
+              ? `
+            <section>
+              <h2 class="text-lg font-bold text-gray-800 border-b border-gray-300 pb-1 mb-3">
+                EDUCATION
+              </h2>
+              ${data.education
+                .map(
+                  (edu) => `
+                <div class="mb-3">
+                  <h3 class="font-semibold">${edu.degree}</h3>
+                  <p class="text-gray-700">${edu.institution}</p>
+                  <p class="text-sm text-gray-600">
+                    ${formatDateForExport(
+                      edu.startDate
+                    )} - ${formatDateForExport(edu.endDate)}
+                  </p>
+                </div>
+              `
+                )
+                .join("")}
+            </section>
+          `
+              : ""
+          }
+
+          ${
+            data.skills && data.skills.length > 0
+              ? `
+            <section>
+              <h2 class="text-lg font-bold text-gray-800 border-b border-gray-300 pb-1 mb-3">
+                SKILLS
+              </h2>
+              <div class="flex flex-wrap gap-1">
+                ${data.skills
+                  .map(
+                    (skill) => `
+                  <span class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-sm">
+                    ${skill}
+                  </span>
+                `
+                  )
+                  .join("")}
+              </div>
+            </section>
+          `
+              : ""
+          }
+        </div>
+      </div>
+    `;
+  };
+
+  // Helper function to format dates for export
+  const formatDateForExport = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      year: "numeric",
+    });
   };
 
   // Template Selector Component
